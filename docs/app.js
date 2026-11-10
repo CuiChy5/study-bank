@@ -23,7 +23,8 @@ async function api(path,{method='GET',body,raw=false}={}){
   if(!res.ok){state.session=null;state.teacher=false;state.records=[];render();throw Error('登录已过期，请重新登录');}
   const token=await res.json();state.session={...token,expires_at:Date.now()/1000+token.expires_in};
  }
- const headers={apikey:cfg.key,Authorization:'Bearer '+(state.session?.access_token||cfg.key)};
+ const headers={apikey:cfg.key};
+ if(state.session?.access_token)headers.Authorization='Bearer '+state.session.access_token;
  if(!raw)headers['Content-Type']='application/json';
  if(path.startsWith('/rest/'))headers.Prefer='return=representation';
  const res=await fetch(cfg.url.replace(/\/$/,'')+path,{method,headers,body:body===undefined?undefined:raw?body:JSON.stringify(body)});
